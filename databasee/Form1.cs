@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,11 +53,12 @@ namespace databasee
 		{
 			if (ToodeTxt.Text!="" && KogusTxt.Text!="" &&HindTxt.Text!="")
 			{
-				command = new SqlCommand("insert into Tooded(Toodenimetus,Kogus,Hind) values (@toode,@kogus,@hind)", connect);
+				command = new SqlCommand("insert into Tooded(Toodenimetus,Kogus,Hind) values (@toode,@kogus,@hind,@pilt)", connect);
 				connect.Open();
 				command.Parameters.AddWithValue("@toode", ToodeTxt.Text);
 				command.Parameters.AddWithValue("@kogus", KogusTxt.Text);
 				command.Parameters.AddWithValue("@hind", HindTxt.Text);
+				command.Parameters.AddWithValue("@pilt", save.FileName+save.Filter);
 				command.ExecuteNonQuery();
 				connect.Close();
 				DisplayData();
@@ -71,37 +73,76 @@ namespace databasee
 
 		private void btn_delete_Click(object sender, EventArgs e)
 		{
-
-		}
-
-		private void btn_update_Click(object sender, EventArgs e)
-		{
-			if (ToodeTxt.Text != "" && KogusTxt.Text != "" && HindTxt.Text != "")
+			if (Id!=0)
 			{
-				command = new SqlCommand("UPDATE Tooded SET Toodenimetus= @toode,Kogus=@kogus,Hind=@hind WHERE Id=@id", connect);
+				command = new SqlCommand("DELETE Tooded WHERE Id=@id", connect);
 				connect.Open();
-				command.Parameters.AddWithValue("@toode", ToodeTxt.Text);
 				command.Parameters.AddWithValue("@id", Id);
-				command.Parameters.AddWithValue("@kogus", KogusTxt.Text);
-				command.Parameters.AddWithValue("@hind", HindTxt.Text);
 				command.ExecuteNonQuery();
 				connect.Close();
 				DisplayData();
 				ClearData();
-				MessageBox.Show("Andmes uuendatud");
+				MessageBox.Show("Andmed on kustutatud");
 			}
 			else
 			{
 				MessageBox.Show("viga");
 			}
 		}
+		SaveFileDialog save;
 
-		private void dataGridView1_RowHeaderMousetClick(object sender, DataGridViewCellEventArgs e)
+		private void btn_update_Click(object sender, EventArgs e)
+		{
+			if (ToodeTxt.Text != "" && KogusTxt.Text != "" && HindTxt.Text != "")
+			{
+				command = new SqlCommand("UPDATE Tooded SET Toodenimetus= @toode,Kogus=@kogus,Hind=@hind, Pilt=@pilt WHERE Id=@id", connect);
+				connect.Open();
+				command.Parameters.AddWithValue("@id", Id);
+				command.Parameters.AddWithValue("@toode", ToodeTxt.Text);
+				command.Parameters.AddWithValue("@kogus", KogusTxt.Text);
+				command.Parameters.AddWithValue("@hind", HindTxt.Text);
+				command.Parameters.AddWithValue("@pilt", save.FileName + save.Filter);
+				command.ExecuteNonQuery();
+				connect.Close();
+				DisplayData();
+				ClearData();
+				MessageBox.Show("Uuendatud");
+			}
+			else
+			{
+				MessageBox.Show("viga");
+			}
+		}
+		
+		private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellEventArgs e)
 		{
 			Id = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString());
 			ToodeTxt.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
 			KogusTxt.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
 			HindTxt.Text = dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString();
+			pictureBox1.Image = Image.FromFile(@"C:\Users\opilane\source\repos\karinahhh\databasee\databasee\images" + dataGridView1.Rows[e.RowIndex].Cells[4].Value.ToString());
+			
+		}
+
+		private void btn_lisa_Click(object sender, EventArgs e)
+		{
+			if (Id != 0)
+			{
+				OpenFileDialog open = new OpenFileDialog();
+				open.Filter = "Image Files (*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
+				if (open.ShowDialog() == DialogResult.OK)
+				{
+					SaveFileDialog save = new SaveFileDialog();
+					save.FileName = ToodeTxt.Text +"_"+ Id;
+					save.Filter = "Image Files (*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
+					save.InitialDirectory = Path.GetFullPath(@"C:\Users\opilane\source\repos\karinahhh\databasee\databasee\images\");
+					save.ShowDialog();
+				}
+			}
+			else
+			{
+				MessageBox.Show("viga");
+			}
 		}
 	}
 }
