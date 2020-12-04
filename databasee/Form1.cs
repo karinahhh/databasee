@@ -141,7 +141,7 @@ namespace databasee
 			}
 			else
 			{
-				MessageBox.Show("viga");
+				MessageBox.Show("Viga");
 			}
 		}
 	}
